@@ -1,5 +1,6 @@
 const POSSIBLEMELDS = require('./possibleMelds')
 const TESTGEAR = require('./testGear.js')
+var fs = require('fs'); 
 
 function meldCombinations(statArray,maxValue,numberOfMelds) {
     statArray = statArray.toString();
@@ -92,20 +93,43 @@ function getValidSets(min, max) {
 function getValidMelds(min, max) {
     var ids = getValidSets(min, max)
     var values = POSSIBLEMELDS
-    var result = [[]]
     for (var i = 0; i < ids.length; i++) {
+        var result = []
+        var count = 0
         console.log(ids[i])
-        for (var n = 0; n < 2176754342; n++) {
+        for (var n = 0; n < 34012224; n++) {
             var statArray = []
-            var meld = dectosex(n).toString();
-            if (meld.length < 12) {
-                do {
-                    meld = "0" + meld
+            if (n<46656) {
+                var meld = dectosex(n).toString();
+                if (meld.length < 12) {
+                    do {
+                        meld = "0" + meld
+                    }
+                    while (meld.length < 12)
                 }
-                while (meld.length < 12)
+                meld = meld.split("").reverse().join("");
             }
-            meld = meld.split("").reverse().join("");
-            console.log(meld)
+            if (n>46655) {
+                
+                if (n % 46656 == 0) { count += 1 }
+                var sixes = n-(46656*count)
+                var meld = dectosex(sixes).toString()
+                if (meld.length < 6) {
+                    do {
+                        meld = "0" + meld
+                    }
+                    while (meld.length < 6)
+                }
+                meld = dectoter(count).toString() + meld
+                if (meld.length < 12) {
+                    do {
+                        meld = "0" + meld
+                    }
+                    while (meld.length < 12)
+                }
+                meld = meld.split("").reverse().join("");
+            }
+                console.log(meld)
             for (var k = 0; k < meld.length; k++) {
                 if (k < 6) {
                     if (ids[i].charAt(k) == "0") {
@@ -197,17 +221,17 @@ function getValidMelds(min, max) {
                     statSum[l] += statArray[k][l]
                 }
             }
-            console.log(statSum)
             if (statSum[4] < max && statSum [4] > min) {
-                result[i].push(statSum)
+                result.push(statSum)
             }
-            result[i] = uniqBy(result[i], JSON.stringify)
+            result = uniqBy(result, JSON.stringify)
         }
-        result[i].push(ids[i])
-        result.push([])
+        result.push(ids[i])
+        fs.appendFile(`./results/${id[i]}.txt`, result, function (err) {
+            if (err) throw err;
+            console.log('Saved!');
+        }); 
     }
-    result.slice(-1)
-    return result
 }
   
 function reduce(arr, callback, initialVal) {
@@ -239,6 +263,10 @@ function dectobin(dec){
   
 function dectosex(dec){
     return (dec >>> 0).toString(6);
+}
+
+function dectoter(dec){
+    return (dec >>> 0).toString(3);
 }
 
 console.log(getValidMelds(1300,1500))
